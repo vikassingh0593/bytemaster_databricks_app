@@ -26,11 +26,36 @@ DATASET_CONFIG = {
 }
 
 # --- 2. DATA LOADER ---
+# def load_data(model_name):
+#     try:
+#         table_name = DATASET_CONFIG[model_name]["table"]
+#         data = getData(tb_nm=table_name)
+        
+#         ts_col = "CreatedTimestamp" if "CreatedTimestamp" in data.columns else "Timestamp"
+#         if ts_col in data.columns:
+#             data[ts_col] = pd.to_datetime(data[ts_col]).dt.strftime("%Y-%m-%d %H:%M:%S")
+        
+#         st.session_state.df_to_edit = data.copy()
+#         st.session_state.original_df = data.copy()
+#     except Exception as e:
+#         st.error(f"Error loading data for {model_name}: {e}")
+
+# --- 2. DATA LOADER ---
 def load_data(model_name):
     try:
         table_name = DATASET_CONFIG[model_name]["table"]
         data = getData(tb_nm=table_name)
         
+        # --- NEW CODE START ---
+        # Ensure the column exists first
+        if "Feedback" not in data.columns:
+            data["Feedback"] = "Unactioned"
+        
+        # Fill missing (NaN) or empty strings with "Unactioned"
+        data["Feedback"] = data["Feedback"].fillna("Unactioned")
+        data["Feedback"] = data["Feedback"].replace("", "Unactioned")
+        # --- NEW CODE END ---
+
         ts_col = "CreatedTimestamp" if "CreatedTimestamp" in data.columns else "Timestamp"
         if ts_col in data.columns:
             data[ts_col] = pd.to_datetime(data[ts_col]).dt.strftime("%Y-%m-%d %H:%M:%S")
@@ -106,8 +131,21 @@ def run_model_ui():
     if st.session_state.df_to_edit is not None:
         column_configuration = {}
         for col in st.session_state.df_to_edit.columns:
+            # if col == "Feedback":
+            #     column_configuration[col] = st.column_config.TextColumn("Feedback", width="large")
             if col == "Feedback":
-                column_configuration[col] = st.column_config.TextColumn("Feedback", width="large")
+                column_configuration[col] = st.column_config.SelectboxColumn(
+                    label="Feedback",
+                    width="medium",
+                    options=[
+                        "Accept", 
+                        "Reject", 
+                        "Under Review",
+                        "Unactioned"
+                    ],
+                    required=True, # Forces user to pick one of the options (cannot be empty)
+                    help="Select the final status for this item"
+                )
             else:
                 column_configuration[col] = st.column_config.Column(disabled=True)
 

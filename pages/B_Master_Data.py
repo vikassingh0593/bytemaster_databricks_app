@@ -20,7 +20,7 @@ DATASET_CONFIG = {
 }
 
 # --- 2. DATA LOADER ---
-def load_data(master_name):
+def load_dataa(master_name):
     try:
         table_name = DATASET_CONFIG[master_name]["table"]
         data = getData(tb_nm=table_name)
@@ -40,7 +40,7 @@ def run_master_ui():
         st.session_state.master_selection = "ComponentExclusion"
     
     if "df_to_edit" not in st.session_state or st.session_state.df_to_edit is None:
-        load_data(st.session_state.master_selection)
+        load_dataa(st.session_state.master_selection)
 
     # --- UI NAVIGATION ---
 
@@ -65,7 +65,7 @@ def run_master_ui():
         # Use i + 2 to skip both the Back button and the Spacer
         if nav_cols[i+2].button(model, use_container_width=True, type="primary" if is_active else "secondary"):
             st.session_state.master_selection = model
-            load_data(model)
+            load_dataa(model)
             st.rerun()
 
     # 4. IMPORTANT: Exit the columns block here. 
