@@ -1,13 +1,15 @@
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import time
 from database_query import getData, writeData 
 
-# --- 1. CONFIGURATION --
+# --- 1. CONFIGURATION ---
 DATASET_CONFIG = {
     "ComponentExclusion": {
         "table": "bytemaster.appdata.DimComponentExclusion",
         "join_keys": ["ComponentId", "PlantId"],
+        # Note: ActiveFlag defaults to 'Y' for new records usually
         "update_columns": ["ActiveFlag", "UpdatedTimestamp", "UserEmail"],
         "filter_columns": ["ComponentId", "PlantId", "UserEmail"]
     },
@@ -15,7 +17,7 @@ DATASET_CONFIG = {
         "table": "bytemaster.appdata.DimSubstitution",
         "join_keys": ["ComponentId", "PlantId", "SubstituteOf"],
         "update_columns": ["ActiveFlag", "UpdatedTimestamp", "UserEmail"],
-        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail"]
+        "filter_columns": ["ComponentId", "PlantId", "UserEmail"]
     },
 }
 
@@ -25,14 +27,17 @@ def load_data(master_name):
         table_name = DATASET_CONFIG[master_name]["table"]
         data = getData(tb_nm=table_name)
         
+        # Ensure timestamp format
         ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in data.columns else "Timestamp"
         if ts_col in data.columns:
             data[ts_col] = pd.to_datetime(data[ts_col]).dt.strftime("%Y-%m-%d %H:%M:%S")
         
+        # Ensure ActiveFlag exists
+        if "ActiveFlag" not in data.columns:
+            data["ActiveFlag"] = "Y"
+        
         st.session_state.df_to_edit = data.copy()
         st.session_state.original_df = data.copy()
-        
-        # FIX 1: Track which master data is currently loaded
         st.session_state.loaded_master_type = master_name
         
     except Exception as e:
@@ -40,17 +45,24 @@ def load_data(master_name):
 
 # --- 3. MAIN UI FUNCTION ---
 def run_master_ui():
-    # Ensure default selection exists
+    # Initialize selection
     if "master_selection" not in st.session_state:
         st.session_state.master_selection = "ComponentExclusion"
     
-    # FIX 2: Check if data is missing OR if the loaded data doesn't match the selection
-    # This prevents showing "ComponentExclusion" data when "Substitution" is selected
+    # Initialize Editor Key for resetting the widget
+    if "master_editor_key" not in st.session_state:
+        st.session_state.master_editor_key = 0
+
+    # Check for data mismatch or missing data
     is_data_mismatch = st.session_state.get("loaded_master_type") != st.session_state.master_selection
     
     if "df_to_edit" not in st.session_state or st.session_state.df_to_edit is None or is_data_mismatch:
         load_data(st.session_state.master_selection)
-        st.rerun() # Rerun to ensure the UI updates with the new data immediately
+        st.session_state.master_editor_key += 1 # Reset editor on load
+        st.rerun()
+
+    current_data = st.session_state.master_selection
+    current_cfg = DATASET_CONFIG[current_data]
 
     # --- UI NAVIGATION ---
     nav_cols = st.columns([0.5, 0.5] + [1.5] * len(DATASET_CONFIG))
@@ -58,7 +70,7 @@ def run_master_ui():
     with nav_cols[0]:
         if st.button("🏠", use_container_width=False):
             st.session_state.page = "home"
-            # Optional: Clear data when going home to save memory
+            # Optional cleanup
             if "df_to_edit" in st.session_state: del st.session_state.df_to_edit
             if "loaded_master_type" in st.session_state: del st.session_state.loaded_master_type
             st.rerun()
@@ -67,66 +79,124 @@ def run_master_ui():
         is_active = st.session_state.get("master_selection") == model
         if nav_cols[i+2].button(model, use_container_width=True, type="primary" if is_active else "secondary"):
             st.session_state.master_selection = model
-            # Force reload handled by the logic at the top of the function
             st.rerun()
 
     st.markdown("<hr style='margin: 0px 0px 10px 0px; border-top: 1px solid #ddd;'>", unsafe_allow_html=True)
 
-    current_data = st.session_state.master_selection
-    current_cfg = DATASET_CONFIG[current_data]
-    
-    # --- 4. DYNAMIC FILTER SECTION ---
+    # --- 4. LAYOUT: FILTERS (Compact Left) - SPACE - ADD RECORD (Right) ---
     if st.session_state.df_to_edit is not None:
         df_display = st.session_state.df_to_edit.copy()
+
+        # UPDATED COLUMNS CONFIGURATION
+        # [2.5] = Compact area for filters (approx 25% width)
+        # [6.5] = Wide empty space to push button to the right
+        # [1]   = Narrow area for the Add button (approx 10% width)
+        col_filters, col_spacer, col_add = st.columns([4.5, 5.7, 0.8], gap="small")
         
-        filter_cols = current_cfg.get("filter_columns", [])
-        if filter_cols:
-            f_ui_cols = st.columns(len(filter_cols))
-            for idx, col_name in enumerate(filter_cols):
-                if col_name in df_display.columns:
-                    unique_vals = sorted(df_display[col_name].dropna().unique().tolist())
-                    # FIX 3: Dynamic key for filters to prevent collisions
-                    selected = f_ui_cols[idx].multiselect(
-                        f"{col_name}", 
-                        options=unique_vals, 
-                        key=f"f_{current_data}_{col_name}" 
-                    )
-                    if selected:
-                        df_display = df_display[df_display[col_name].isin(selected)]
+        # --- LEFT: FILTERS ---
+        with col_filters:
+            filter_cols = current_cfg.get("filter_columns", [])
+            if filter_cols:
+                # Check how many filters we have to avoid squeezing them too much
+                # If there are many filters, they will stack nicely in this narrower column
+                f_ui_cols = st.columns(len(filter_cols))
+                for idx, col_name in enumerate(filter_cols):
+                    if col_name in df_display.columns:
+                        unique_vals = sorted(df_display[col_name].dropna().unique().tolist())
+                        selected = f_ui_cols[idx].multiselect(
+                            f"{col_name}", 
+                            options=unique_vals, 
+                            key=f"f_{current_data}_{col_name}",
+                            label_visibility="collapsed",
+                            placeholder=f"{col_name}"
+                        )
+                        if selected:
+                            df_display = df_display[df_display[col_name].isin(selected)]
+        
+        # --- MIDDLE: SPACER ---
+        with col_spacer:
+            st.empty() 
+
+        # --- RIGHT: ADD RECORD POPUP ---
+        with col_add:
+            # use_container_width=True ensures the button fills the narrow column width perfectly
+            with st.popover("➕ Add", use_container_width=False):
+                st.write(f"**Add to {current_data}**")
+                with st.form("add_master_record", clear_on_submit=True):
+                    # DYNAMIC FIELDS
+                    new_comp_id = st.text_input("ComponentId", placeholder="Required")
+                    new_plant_id = st.text_input("PlantId", placeholder="Required")
+                    
+                    new_sub_of = None
+                    if current_data == "Substitution":
+                        new_sub_of = st.text_input("SubstituteOf", placeholder="Required")
+                    
+                    new_active = st.selectbox("ActiveFlag", options=["Y", "N"])
+                    
+                    submitted = st.form_submit_button("Add Row", type="primary")
+                    
+                    if submitted:
+                        # Validation
+                        valid = True
+                        if not new_comp_id or not new_plant_id:
+                            valid = False
+                        if current_data == "Substitution" and not new_sub_of:
+                            valid = False
+                            
+                        if valid:
+                            user_email = st.context.headers.get("X-Forwarded-Email", "local_user")
+                            ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in st.session_state.df_to_edit.columns else "Timestamp"
+                            
+                            new_row_data = {
+                                "ComponentId": new_comp_id,
+                                "PlantId": new_plant_id,
+                                "ActiveFlag": new_active,
+                                "UserEmail": user_email,
+                                ts_col: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            
+                            if current_data == "Substitution":
+                                new_row_data["SubstituteOf"] = new_sub_of
+
+                            new_row_df = pd.DataFrame([new_row_data])
+                            st.session_state.df_to_edit = pd.concat(
+                                [st.session_state.df_to_edit, new_row_df], 
+                                ignore_index=True
+                            )
+                            
+                            st.toast("✅ Row added! Click 'Save' to commit.", icon="💾")
+                            st.session_state.master_editor_key += 1
+                            time.sleep(0.5)
+                            st.rerun()
+                        else:
+                            st.error("Please fill in all required fields.")
 
         # --- 5. DATA EDITOR ---
         column_configuration = {}
         for col in st.session_state.df_to_edit.columns:
-            # if col == "ActiveFlag":
-            #     column_configuration[col] = st.column_config.TextColumn("ActiveFlag", width="large")
             if col == "ActiveFlag":
                 column_configuration[col] = st.column_config.SelectboxColumn(
                     label="ActiveFlag",
                     width="medium",
-                    options=[
-                        "Y", 
-                        "N", 
-                    ],
-                    required=True, # Forces user to pick one of the options (cannot be empty)
-                    help="Select the final status for this item"
+                    options=["Y", "N"],
+                    required=True
                 )
             else:
                 column_configuration[col] = st.column_config.Column(disabled=True)
 
-        # FIX 4: DYNAMIC KEY for data_editor
-        # Using f"editor_{current_data}" ensures a fresh widget is created for every tab.
-        editor_key = f"editor_{current_data}"
+        # Dynamic Key
+        editor_key = f"editor_{current_data}_{st.session_state.master_editor_key}"
 
         st.data_editor(
             df_display,
             key=editor_key,
             column_config=column_configuration,
             use_container_width=True,
-            hide_index=False 
+            height=400,
+            hide_index=True 
         )
 
         # --- 6. PROCESS EDITS ---
-        # Retrieve state using the NEW dynamic key
         state = st.session_state.get(editor_key)
         
         if state and state.get("edited_rows"):
@@ -136,7 +206,6 @@ def run_master_ui():
             has_changes = False
             for row_idx_in_filtered, changes in state["edited_rows"].items():
                 if "ActiveFlag" in changes:
-                    # Map the filtered row back to the original index
                     actual_index = df_display.index[row_idx_in_filtered]
                     st.session_state.df_to_edit.at[actual_index, "ActiveFlag"] = changes["ActiveFlag"]
                     st.session_state.df_to_edit.at[actual_index, ts_col] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -152,15 +221,33 @@ def run_master_ui():
             df_curr = st.session_state.df_to_edit.reset_index(drop=True)
             df_orig = st.session_state.original_df.reset_index(drop=True)
             
-            changed_mask = ~(df_curr.fillna('').eq(df_orig.fillna(''))).all(axis=1)
-            changed_rows = df_curr[changed_mask].copy()
+            # --- UPDATED SAVE LOGIC (Handles New + Modified Rows) ---
+            rows_to_save = pd.DataFrame()
+            
+            # 1. Identify New Rows
+            len_orig = len(df_orig)
+            len_curr = len(df_curr)
+            
+            if len_curr > len_orig:
+                new_rows = df_curr.iloc[len_orig:]
+                rows_to_save = pd.concat([rows_to_save, new_rows])
+            
+            # 2. Identify Modified Rows
+            df_curr_overlap = df_curr.iloc[:len_orig]
+            
+            if not df_curr_overlap.empty and not df_orig.empty:
+                changed_mask = ~(df_curr_overlap.fillna('').astype(str).eq(df_orig.fillna('').astype(str))).all(axis=1)
+                modified_rows = df_curr_overlap[changed_mask]
+                rows_to_save = pd.concat([rows_to_save, modified_rows])
 
-            if not changed_rows.empty:
+            if not rows_to_save.empty:
                 try:
-                    with st.spinner(f"Updating {len(changed_rows)} rows..."):
-                        writeData(changed_rows, current_cfg)
-                        st.success(f"Successfully updated {len(changed_rows)} rows!")
+                    with st.spinner(f"Updating {len(rows_to_save)} rows..."):
+                        writeData(rows_to_save, current_cfg)
+                        st.success(f"Successfully updated/inserted {len(rows_to_save)} rows!")
                         st.session_state.original_df = df_curr.copy()
+                        st.session_state.master_editor_key += 1
+                        st.rerun()
                 except Exception as e:
                     st.error(f"Failed to save: {e}")
             else:
