@@ -88,19 +88,6 @@ def run_model_ui():
     # --- 4. DYNAMIC FILTER SECTION ---
     df_display = st.session_state.df_to_edit.copy()
     
-    # filter_cols = current_cfg.get("filter_columns", [])
-    # if filter_cols:
-    #     f_ui_cols = st.columns(len(filter_cols))
-    #     for idx, col_name in enumerate(filter_cols):
-    #         if col_name in df_display.columns:
-    #             unique_vals = sorted(df_display[col_name].dropna().unique().tolist())
-    #             selected = f_ui_cols[idx].multiselect(
-    #                 f"{col_name}", 
-    #                 options=unique_vals, 
-    #                 key=f"f_{current_model}_{col_name}"
-    #             )
-    #             if selected:
-    #                 df_display = df_display[df_display[col_name].isin(selected)]
     filter_cols = current_cfg.get("filter_columns", [])
     if filter_cols:
         # Create columns: Left (3 parts) for Filters, Right (1 part) Empty
