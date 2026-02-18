@@ -26,6 +26,21 @@ DATASET_CONFIG = {
 }
 
 # --- 2. DATA LOADER ---
+# def load_data(model_name):
+#     try:
+#         table_name = DATASET_CONFIG[model_name]["table"]
+#         data = getData(tb_nm=table_name)
+        
+#         ts_col = "CreatedTimestamp" if "CreatedTimestamp" in data.columns else "Timestamp"
+#         if ts_col in data.columns:
+#             data[ts_col] = pd.to_datetime(data[ts_col]).dt.strftime("%Y-%m-%d %H:%M:%S")
+        
+#         st.session_state.df_to_edit = data.copy()
+#         st.session_state.original_df = data.copy()
+#     except Exception as e:
+#         st.error(f"Error loading data for {model_name}: {e}")
+
+# --- 2. DATA LOADER ---
 def load_data(model_name):
     try:
         table_name = DATASET_CONFIG[model_name]["table"]
