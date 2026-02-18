@@ -13,5 +13,5 @@ def run_user_setting_ui():
     data = getData(tb_nm = 'bytemaster.appdata.UserSettings')
     st.table(data)
     
-    if st.button("Save To Databricks"):
+    if st.button("Save To Database"):
         st.success("Saved!")

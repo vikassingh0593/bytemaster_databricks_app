@@ -115,7 +115,9 @@ def run_model_ui():
                     selected = f_ui_cols[idx].multiselect(
                         f"{col_name}", 
                         options=unique_vals, 
-                        key=f"f_{current_model}_{col_name}"
+                        key=f"f_{current_model}_{col_name}",
+                        label_visibility="collapsed",
+                        placeholder=f"{col_name}"
                     )
                     if selected:
                         df_display = df_display[df_display[col_name].isin(selected)]
@@ -231,7 +233,7 @@ def run_model_ui():
 
         # --- 7. SAVE ACTION ---
         st.markdown("<hr style='margin: 0px 0px 10px 0px; border-top: 1px solid #ddd;'>", unsafe_allow_html=True)
-        if st.button("Save Changes to Databricks", type="primary", use_container_width=False):
+        if st.button("Save to Database", type="primary", use_container_width=False):
             df_curr = st.session_state.df_to_edit.reset_index(drop=True)
             df_orig = st.session_state.original_df.reset_index(drop=True)
             
