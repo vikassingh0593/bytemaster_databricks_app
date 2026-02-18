@@ -169,7 +169,7 @@ def run_model_ui():
         state = st.session_state.get(dynamic_widget_key)
         
         if state and state.get("edited_rows"):
-            user_email = st.context.headers.get("X-Forwarded-Email", "local_user")
+            user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com")
             ts_col = "CreatedTimestamp" if "CreatedTimestamp" in df_display.columns else "Timestamp"
             
             valid_update_occurred = False

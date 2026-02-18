@@ -144,7 +144,7 @@ def run_master_ui():
                             valid = False
                             
                         if valid:
-                            user_email = st.context.headers.get("X-Forwarded-Email", "local_user")
+                            user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com")
                             ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in st.session_state.df_to_edit.columns else "Timestamp"
                             
                             new_row_data = {
