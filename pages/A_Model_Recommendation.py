@@ -170,7 +170,7 @@ def run_model_ui():
             key=dynamic_widget_key,  # <--- Use the dynamic key here
             column_config=column_configuration,
             use_container_width=True,
-            height=400,
+            height=388,
             hide_index=True 
         )
 

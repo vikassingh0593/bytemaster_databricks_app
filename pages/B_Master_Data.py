@@ -192,7 +192,7 @@ def run_master_ui():
             key=editor_key,
             column_config=column_configuration,
             use_container_width=True,
-            height=400,
+            height=388,
             hide_index=True 
         )
 
