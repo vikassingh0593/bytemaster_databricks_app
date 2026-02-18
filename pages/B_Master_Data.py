@@ -25,7 +25,7 @@ DATASET_CONFIG = {
 def load_data(master_name):
     try:
         table_name = DATASET_CONFIG[master_name]["table"]
-        data = getData(tb_nm=table_name)
+        data = getData(tb_nm=table_name, ActiveFlag = "Y")
         
         # Ensure timestamp format
         ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in data.columns else "Timestamp"

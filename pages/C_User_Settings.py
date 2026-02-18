@@ -18,7 +18,7 @@ USER_DATA_CONFIG = {
 def load_user_data():
     try:
         table_name = USER_DATA_CONFIG["UserSettings"]["table"]
-        data = getData(tb_nm=table_name)
+        data = getData(tb_nm=table_name, ActiveFlag = None)
         
         # Format Timestamp
         ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in data.columns else "Timestamp"

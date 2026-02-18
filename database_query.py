@@ -106,16 +106,41 @@ def get_db_connection():
     )
 
 # --- READ FUNCTION ---
-def getData(tb_nm: str) -> pd.DataFrame:
+# def getData(tb_nm: str, ActiveFlag: str = None) -> pd.DataFrame:
+#     """
+#     Reads data from a specific table into a Pandas DataFrame.
+#     """
+#     if ActiveFlag:
+#         query = f"SELECT * FROM {tb_nm} WHERE ActiveFlag = '{ActiveFlag}'"
+#     else:
+#         query = f"SELECT * FROM {tb_nm}"
+#     try:
+#         with get_db_connection() as conn:
+#             with conn.cursor() as cursor:
+#                 cursor.execute(query)
+#                 # fetchall_arrow() is generally faster for larger datasets
+#                 return cursor.fetchall_arrow().to_pandas()
+#     except Exception as e:
+#         raise Exception(f"Failed to read data from {tb_nm}: {str(e)}")
+
+# database_query.py
+
+def getData(tb_nm: str, ActiveFlag: str | None = None) -> pd.DataFrame:
     """
-    Reads data from a specific table into a Pandas DataFrame.
+    Reads data from a table name.
+    Optional: Filters by ActiveFlag if provided ('Y' or 'N').
     """
     query = f"SELECT * FROM {tb_nm}"
+    
+    # Add WHERE clause if ActiveFlag is passed
+    if ActiveFlag:
+        # We use a parameterized query for safety, though f-string is often fine for internal flags
+        query += f" WHERE ActiveFlag = '{ActiveFlag}'"
+
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query)
-                # fetchall_arrow() is generally faster for larger datasets
                 return cursor.fetchall_arrow().to_pandas()
     except Exception as e:
         raise Exception(f"Failed to read data from {tb_nm}: {str(e)}")

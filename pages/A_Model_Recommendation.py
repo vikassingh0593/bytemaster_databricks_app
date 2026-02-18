@@ -30,7 +30,7 @@ DATASET_CONFIG = {
 def load_data(model_name):
     try:
         table_name = DATASET_CONFIG[model_name]["table"]
-        data = getData(tb_nm=table_name)
+        data = getData(tb_nm=table_name, ActiveFlag = None)
         
         # --- NEW CODE START ---
         # Ensure the column exists first
