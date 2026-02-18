@@ -29,8 +29,49 @@ DATASET_CONFIG = {
 # --- 2. DATA LOADER ---
 def load_data(model_name):
     try:
+        # user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com")
+        # table_name = DATASET_CONFIG[model_name]["table"]
+        # data = getData(tb_nm=table_name, ActiveFlag = None)
+
+        # us_df = getData("bytemaster.appdata.UserSettings")
+        # us_df['UserEmail'] = us_df['UserEmail'].astype(str).str.strip().str.lower()
+        # us_df = us_df[us_df['UserEmail'] == user_email.lower()]
+        # data = data.merge(us_df, on="PlantId", how="inner")
+        
+        # 1. Get User Email
+        user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com").lower()
+
+        # 2. Fetch Data
         table_name = DATASET_CONFIG[model_name]["table"]
-        data = getData(tb_nm=table_name, ActiveFlag = None)
+        data = getData(tb_nm=table_name, ActiveFlag=None)
+
+        # 3. Fetch Permissions
+        us_df = getData("bytemaster.appdata.UserSettings")
+        us_df['UserEmail'] = us_df['UserEmail'].astype(str).str.strip().str.lower()
+        
+        # 4. Get Current User's Permissions
+        my_perms = us_df[us_df['UserEmail'] == user_email]
+        
+        if my_perms.empty:
+            # Case: User has NO permissions at all -> Empty Dataframe
+            data = data.iloc[0:0]
+        else:
+            # 5. Check for 'ALL' Access
+            # We normalize to uppercase to be safe
+            allowed_plants = my_perms['PlantId'].str.upper().unique().tolist()
+            
+            if 'ALL' in allowed_plants:
+                # ADMIN ACCESS: Do not filter, show everything
+                pass 
+            else:
+                # RESTRICTED ACCESS: Filter data using .isin()
+                # This keeps the original columns clean without adding _x/_y suffixes
+                if "PlantId" in data.columns:
+                    data = data[data["PlantId"].isin(allowed_plants)]
+                else:
+                    # If the main table doesn't have PlantId, we can't filter it.
+                    # Safest option is to show nothing.
+                    data = data.iloc[0:0]
         
         # --- NEW CODE START ---
         # Ensure the column exists first
