@@ -108,7 +108,7 @@ def render_filters(df, context="model"):
     if selected_status and "Feedback" in filtered_df.columns:
         filtered_df = filtered_df[filtered_df["Feedback"].isin(selected_status)]
 
-    st.markdown("<hr style='margin: 10px 0px 20px 0px;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='margin: 0px 0px 10px 0px;'>", unsafe_allow_html=True)
     return filtered_df
 
 # --- 4. MAIN DASHBOARD UI ---
@@ -136,32 +136,30 @@ def run_dashboard_ui():
     # ==========================================
     # 👈 LEFT NAVIGATION MENU
     # ==========================================
-    # with nav_col:
-    #     # st.markdown("### 🗂️ Menu")
-    #     # st.markdown("<hr style='margin: 0px 0px 15px 0px;'>", unsafe_allow_html=True)
-        
-    #     nav_options = ["Model Output", "Master Data", "Graphs"]
-        
-    #     for option in nav_options:
-    #         btn_type = "primary" if st.session_state.nav_main == option else "secondary"
-    #         if st.button(option, use_container_width=False, type=btn_type):
-    #             st.session_state.nav_main = option
-    #             st.rerun()
     with nav_col:
-            # --- NEW: Back to App Button ---
-            if st.button("🏠", use_container_width=False, type="secondary"):
-                st.session_state.page = "home"
+        # --- NEW: Back to App Button ---
+        # --- NEW: Remove gap specifically for this left column ---
+        st.markdown("""
+            <style>
+                /* Target only the first column and force the vertical gap to zero */
+                div[data-testid="column"]:nth-of-type(1) div[data-testid="stVerticalBlock"] {
+                    gap: 0.5rem !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+        if st.button("🏠", use_container_width=False, type="secondary"):
+            st.session_state.page = "home"
+            st.rerun()
+            
+        # st.markdown("<hr style='margin: 10px 0px 15px 0px;'>", unsafe_allow_html=True)
+        
+        nav_options = ["Model Output", "Master Data", "Graphs"]
+        
+        for option in nav_options:
+            btn_type = "primary" if st.session_state.nav_main == option else "secondary"
+            if st.button(option, use_container_width=True, type=btn_type):
+                st.session_state.nav_main = option
                 st.rerun()
-                
-            # st.markdown("<hr style='margin: 10px 0px 15px 0px;'>", unsafe_allow_html=True)
-            
-            nav_options = ["Model Output", "Master Data", "Graphs"]
-            
-            for option in nav_options:
-                btn_type = "primary" if st.session_state.nav_main == option else "secondary"
-                if st.button(option, use_container_width=True, type=btn_type):
-                    st.session_state.nav_main = option
-                    st.rerun()
 
     # ==========================================
     # 📈 MAIN CONTENT AREA
@@ -195,7 +193,7 @@ def run_dashboard_ui():
                 #         use_container_width=False
                 #     )
                 
-                st.dataframe(filtered_df, use_container_width=True, hide_index=True, height=388)
+                st.dataframe(filtered_df, use_container_width=True, hide_index=True, height=493)
             else:
                 st.warning("No data found.")
 
@@ -225,7 +223,7 @@ def run_dashboard_ui():
                 #         use_container_width=True
                 #     )
 
-                st.dataframe(filtered_df, use_container_width=True, hide_index=True, height=388)
+                st.dataframe(filtered_df, use_container_width=True, hide_index=True, height=493)
             else:
                 st.warning("No data found.")
 

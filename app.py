@@ -140,7 +140,9 @@ if st.session_state.page == "model":
 elif st.session_state.page == "master":
     sub_label = st.session_state.get("selected_master", "ComponentExclusion")
 elif st.session_state.page == "settings":
-    sub_label = st.session_state.get("selected_settings", "Settings")
+    sub_label = st.session_state.get("user_editor_key", "Settings")
+elif st.session_state.page == "dashboard":
+    sub_label = st.session_state.get("nav_main", "Model Output")
 
 if sub_label:
     breadcrumb += f" <span style='color: #999; font-size: 1.5rem;'>&rarr;</span> {sub_label}"
