@@ -299,15 +299,28 @@ def settings_page():
         run_user_setting_ui()
 
 
+# def dashboard_page():
+#     # General Access Check
+#     if not st.session_state.user_permissions:
+#         st.error("Access Denied")
+#         return
+
+#     with st.spinner(' '):
+#         st.button("🏠", on_click=go, args=("home",))
+#         st.write("Dashboard Placeholder")
+
 def dashboard_page():
     # General Access Check
     if not st.session_state.user_permissions:
         st.error("Access Denied")
         return
 
-    with st.spinner(' '):
-        st.button("🏠", on_click=go, args=("home",))
-        st.write("Dashboard Placeholder")
+    with st.spinner('Loading Dashboard...'):
+        st.button("🏠 Home", on_click=go, args=("home",))
+        
+        # Import and run the dashboard UI
+        from pages.D_Dashboard import run_dashboard_ui
+        run_dashboard_ui()
 
 # --- ROUTER ---
 if st.session_state.page == "home":

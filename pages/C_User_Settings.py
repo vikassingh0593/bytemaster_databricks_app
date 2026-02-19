@@ -5,7 +5,7 @@ import time
 from database_query import getData, writeData, deleteData
 
 # --- 1. CONFIGURATION ---
-USER_DATA_CONFIG = {
+DATASET_CONFIG = {
     "UserSettings": {
         "table": "bytemaster.appdata.UserSettings",
         "join_keys": ["PlantId"], 
@@ -17,7 +17,7 @@ USER_DATA_CONFIG = {
 # --- 2. DATA LOADER ---
 def load_user_data():
     try:
-        table_name = USER_DATA_CONFIG["UserSettings"]["table"]
+        table_name = DATASET_CONFIG["UserSettings"]["table"]
         data = getData(tb_nm=table_name, ActiveFlag = None)
         
         # Format Timestamp
@@ -46,7 +46,7 @@ def run_user_setting_ui():
         load_user_data()
         st.rerun()
 
-    current_cfg = USER_DATA_CONFIG["UserSettings"]
+    current_cfg = DATASET_CONFIG["UserSettings"]
     
     # --- 4. LAYOUT ---
     if st.session_state.user_df_to_edit is not None:
