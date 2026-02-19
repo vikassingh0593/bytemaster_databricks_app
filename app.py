@@ -316,7 +316,7 @@ def dashboard_page():
         return
 
     with st.spinner('Loading Dashboard...'):
-        st.button("🏠 Home", on_click=go, args=("home",))
+        # st.button("🏠 Home", on_click=go, args=("home",))
         
         # Import and run the dashboard UI
         from pages.D_Dashboard import run_dashboard_ui
