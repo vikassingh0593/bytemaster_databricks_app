@@ -19,7 +19,7 @@
     "pages/A_Model_Recommendation.py": "2026-02-18T22:03:06.394646978+05:30",
     "pages/B_Master_Data.py": "2026-02-18T21:43:39.152951465+05:30",
     "pages/C_User_Settings.py": "2026-02-20T00:14:41.827745481+05:30",
-    "pages/D_Dashboard": "2026-02-20T00:28:09.523217872+05:30",
+    "pages/D_Dashboard.py": "2026-02-20T00:28:09.523217872+05:30",
     "pages/__init__.py": "2026-02-17T23:10:58.59807543+05:30",
     "requirements.txt": "2026-02-20T00:23:14.973019307+05:30",
     "test.py": "2026-02-17T23:11:00.685068528+05:30"
@@ -41,7 +41,7 @@
     "pages/A_Model_Recommendation.py": "pages/A_Model_Recommendation.py",
     "pages/B_Master_Data.py": "pages/B_Master_Data.py",
     "pages/C_User_Settings.py": "pages/C_User_Settings.py",
-    "pages/D_Dashboard": "pages/D_Dashboard",
+    "pages/D_Dashboard.py": "pages/D_Dashboard.py",
     "pages/__init__.py": "pages/__init__.py",
     "requirements.txt": "requirements.txt",
     "test.py": "test"
@@ -63,7 +63,7 @@
     "pages/A_Model_Recommendation.py": "pages/A_Model_Recommendation.py",
     "pages/B_Master_Data.py": "pages/B_Master_Data.py",
     "pages/C_User_Settings.py": "pages/C_User_Settings.py",
-    "pages/D_Dashboard": "pages/D_Dashboard",
+    "pages/D_Dashboard.py": "pages/D_Dashboard.py",
     "pages/__init__.py": "pages/__init__.py",
     "requirements.txt": "requirements.txt",
     "test": "test.py"
