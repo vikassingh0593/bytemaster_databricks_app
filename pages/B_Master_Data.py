@@ -28,7 +28,7 @@ def load_data(master_name):
         data = getData(tb_nm=table_name, ActiveFlag = "Y")
         
         # Ensure timestamp format
-        ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in data.columns else "Timestamp"
+        ts_col = "UpdatedTimestamp"
         if ts_col in data.columns:
             data[ts_col] = pd.to_datetime(data[ts_col]).dt.strftime("%Y-%m-%d %H:%M:%S")
         
@@ -145,7 +145,7 @@ def run_master_ui():
                             
                         if valid:
                             user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com")
-                            ts_col = "UpdatedTimestamp" if "UpdatedTimestamp" in st.session_state.df_to_edit.columns else "Timestamp"
+                            ts_col = "UpdatedTimestamp"
                             
                             new_row_data = {
                                 "ComponentId": new_comp_id,

@@ -8,21 +8,21 @@ import time
 DATASET_CONFIG = {
     "Substitution": {
         "table": "bytemaster.appdata.Substitution",
-        "join_keys": ["ComponentId", "PlantId", "MaterialId"],
+        "join_keys": ["RunID", "ComponentId", "PlantId", "MaterialId"],
         "update_columns": ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"],
-        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail"]
+        "filter_columns": ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
     },
     "BatchReplacement": {
         "table": "bytemaster.appdata.BatchReplacement",
-        "join_keys": ["ComponentId", "PlantId", "MaterialId"],
+        "join_keys": ["RunID", "ComponentId", "PlantId", "MaterialId"],
         "update_columns": ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"],
-        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail"]
+        "filter_columns": ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
     },
     "ProdIncrease": {
         "table": "bytemaster.appdata.ProdIncrease",
-        "join_keys": ["ComponentId", "PlantId", "MaterialId"],
+        "join_keys": ["RunID", "ComponentId", "PlantId", "MaterialId"],
         "update_columns": ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"],
-        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail"]
+        "filter_columns": ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
     }
 }
 
@@ -39,10 +39,31 @@ def load_data(model_name):
 
         # 3. Fetch Permissions
         us_df = getData("bytemaster.appdata.UserSettings")
-        us_df['UserEmail'] = us_df['UserEmail'].astype(str).str.strip().str.lower()
+        # us_df['ApprovedMailID'] = us_df['ApprovedMailID'].astype(str).str.strip().str.lower()
         
-        # 4. Get Current User's Permissions
-        my_perms = us_df[us_df['UserEmail'] == user_email]
+        # # 4. Get Current User's Permissions
+        # my_perms = us_df[us_df['ApprovedMailID'] == user_email]
+        user_email_lower = str(user_email).strip().lower()
+
+        # 2. Filter us_df for rows where user_email is in the comma-separated ApprovedMailID
+        # We split by comma, strip whitespace from each email, and check for a match
+        my_perms = us_df[
+            us_df['ApprovedMailID'].astype(str).str.lower().apply(
+                lambda x: user_email_lower in [email.strip() for email in x.split(',')]
+            )
+        ]
+
+        # 3. Check if any permissions were found
+        if my_perms.empty:
+            return [] # No access
+
+        # 4. Get unique list of plants and normalize to uppercase
+        allowed_plants = my_perms['PlantId'].unique().tolist()
+        allowed_plants = [str(p).strip().upper() for p in allowed_plants]
+
+
+
+
         
         if my_perms.empty:
             # Case: User has NO permissions at all -> Empty Dataframe
@@ -50,7 +71,7 @@ def load_data(model_name):
         else:
             # 5. Check for 'ALL' Access
             # We normalize to uppercase to be safe
-            allowed_plants = my_perms['PlantId'].str.upper().unique().tolist()
+            # allowed_plants = my_perms['PlantId'].str.upper().unique().tolist()
             
             if 'ALL' in allowed_plants:
                 # ADMIN ACCESS: Do not filter, show everything
@@ -75,7 +96,7 @@ def load_data(model_name):
         data["Feedback"] = data["Feedback"].replace("", "Unactioned")
         # --- NEW CODE END ---
 
-        ts_col = "CreatedTimestamp" if "CreatedTimestamp" in data.columns else "Timestamp"
+        ts_col = "CreatedTimestamp" 
         if ts_col in data.columns:
             data[ts_col] = pd.to_datetime(data[ts_col]).dt.strftime("%Y-%m-%d %H:%M:%S")
         

@@ -38,18 +38,39 @@ def load_user_permissions():
 
         # 2. Filter for current user
         # Clean emails to ensure case-insensitive matching
-        df_perms['UserEmail'] = df_perms['UserEmail'].astype(str).str.strip().str.lower()
-        my_perms = df_perms[df_perms['UserEmail'] == user_email.lower()]
+        # df_perms['ApprovedMailID'] = df_perms['ApprovedMailID'].astype(str).str.strip().str.lower()
+        # my_perms = df_perms[df_perms['ApprovedMailID'] == user_email.lower()]
         
+        # if my_perms.empty:
+        #     return [] # No access
+        
+        # # 3. Get list of plants
+        # allowed_plants = my_perms['PlantId'].unique().tolist()
+        
+        # # Handle 'ALL' case (normalize to uppercase)
+        # allowed_plants = [p.upper() for p in allowed_plants]
+        
+        # return allowed_plants
+        # 1. Normalize the search email
+        user_email_lower = str(user_email).strip().lower()
+
+        # 2. Filter df_perms for rows where user_email is in the comma-separated ApprovedMailID
+        # We split by comma, strip whitespace from each email, and check for a match
+        my_perms = df_perms[
+            df_perms['ApprovedMailID'].astype(str).str.lower().apply(
+                lambda x: user_email_lower in [email.strip() for email in x.split(',')]
+            )
+        ]
+
+        # 3. Check if any permissions were found
         if my_perms.empty:
             return [] # No access
-        
-        # 3. Get list of plants
+
+        # 4. Get unique list of plants and normalize to uppercase
         allowed_plants = my_perms['PlantId'].unique().tolist()
-        
-        # Handle 'ALL' case (normalize to uppercase)
-        allowed_plants = [p.upper() for p in allowed_plants]
-        
+        allowed_plants = [str(p).strip().upper() for p in allowed_plants]
+
+        # 5. Result
         return allowed_plants
 
     except Exception as e:
