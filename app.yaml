@@ -2,7 +2,6 @@ command: [
   "streamlit", 
   "run",
   "app.py",
-  "--theme.primaryColor=#6b7280"
 ]
 
 env:
@@ -12,3 +11,6 @@ env:
     value: "false"
   - name: "STREAMLIT_THEME_BASE"
     value: "light"
+  # Must be STREAMLIT_THEME_PRIMARY_COLOR (underscore), not PRIMARYCOLOR
+  - name: "STREAMLIT_THEME_PRIMARY_COLOR"
+    value: "#9ca3af"

@@ -1,2 +1,5 @@
+# Theme: run "streamlit run app.py" from the project root so this file is found.
+# Project config path is: <current working directory>/.streamlit/config.toml
 [theme]
-primaryColor="#6b7280"
+base = "light"
+primaryColor = "#007bff"
