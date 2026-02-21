@@ -8,21 +8,21 @@ import time
 DATASET_CONFIG = {
     "Substitution": {
         "table": "bytemaster.appdata.Substitution",
-        "join_keys": ["RunID", "ComponentId", "PlantId", "MaterialId"],
+        "join_keys": ["ComponentId", "PlantId", "MaterialId"],
         "update_columns": ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"],
-        "filter_columns": ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
     },
     "BatchReplacement": {
         "table": "bytemaster.appdata.BatchReplacement",
-        "join_keys": ["RunID", "ComponentId", "PlantId", "MaterialId"],
+        "join_keys": ["ComponentId", "PlantId", "MaterialId"],
         "update_columns": ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"],
-        "filter_columns": ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
     },
     "ProdIncrease": {
         "table": "bytemaster.appdata.ProdIncrease",
-        "join_keys": ["RunID", "ComponentId", "PlantId", "MaterialId"],
+        "join_keys": ["ComponentId", "PlantId", "MaterialId"],
         "update_columns": ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"],
-        "filter_columns": ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+        "filter_columns": ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
     }
 }
 
@@ -35,7 +35,7 @@ def load_data(model_name):
 
         # 2. Fetch Data
         table_name = DATASET_CONFIG[model_name]["table"]
-        data = getData(tb_nm=table_name, ActiveFlag=None)
+        data = getData(tb_nm=table_name, SqlStr=' where RunID = (select max(RunID) from bytemaster.appdata.Substitution)')
 
         # 3. Fetch Permissions
         us_df = getData("bytemaster.appdata.UserSettings")

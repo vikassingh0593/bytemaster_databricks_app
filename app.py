@@ -35,23 +35,6 @@ def load_user_permissions():
         
         if df_perms.empty:
             return []
-
-        # 2. Filter for current user
-        # Clean emails to ensure case-insensitive matching
-        # df_perms['ApprovedMailID'] = df_perms['ApprovedMailID'].astype(str).str.strip().str.lower()
-        # my_perms = df_perms[df_perms['ApprovedMailID'] == user_email.lower()]
-        
-        # if my_perms.empty:
-        #     return [] # No access
-        
-        # # 3. Get list of plants
-        # allowed_plants = my_perms['PlantId'].unique().tolist()
-        
-        # # Handle 'ALL' case (normalize to uppercase)
-        # allowed_plants = [p.upper() for p in allowed_plants]
-        
-        # return allowed_plants
-        # 1. Normalize the search email
         user_email_lower = str(user_email).strip().lower()
 
         # 2. Filter df_perms for rows where user_email is in the comma-separated ApprovedMailID
@@ -187,10 +170,10 @@ def go(page_name):
 # --- DYNAMIC TITLE LOGIC ---
 page_labels = {
     "home": "",
-    "model": " <span style='color: #666; font-size: 2rem;'>&rarr;</span> Model Recommendation",
-    "master": " <span style='color: #666; font-size: 2rem;'>&rarr;</span> Master Data",
-    "settings": " <span style='color: #666; font-size: 2rem;'>&rarr;</span> User Settings",
-    "dashboard": " <span style='color: #666; font-size: 2rem;'>&rarr;</span> Dashboard"
+    "model": " <span style='color: #666; font-size: 2rem; vertical-align: middle;'>➔</span> Model Recommendation",
+    "master": " <span style='color: #666; font-size: 2rem;vertical-align: middle;'>➔</span> Master Data",
+    "settings": " <span style='color: #666; font-size: 2rem;vertical-align: middle;'>➔</span> User Settings",
+    "dashboard": " <span style='color: #666; font-size: 2rem;vertical-align: middle;'>➔</span> Dashboard"
 }
 
 breadcrumb = page_labels.get(st.session_state.page, "")
@@ -200,13 +183,12 @@ if st.session_state.page == "model":
     sub_label = st.session_state.get("selected_model", "Substitution")
 elif st.session_state.page == "master":
     sub_label = st.session_state.get("selected_master", "ComponentExclusion")
-elif st.session_state.page == "settings":
-    sub_label = st.session_state.get("user_editor_key", "Settings")
+elif st.session_state.page == "Settings":
+    sub_label = ""
 elif st.session_state.page == "dashboard":
     sub_label = st.session_state.get("nav_main", "Model Output")
-
 if sub_label:
-    breadcrumb += f" <span style='color: #999; font-size: 1.5rem;'>&rarr;</span> {sub_label}"
+    breadcrumb += f" <span style='color: #666; font-size: 2rem;vertical-align: middle;'>➔</span> {sub_label}"
 
 st.markdown(
     f"""

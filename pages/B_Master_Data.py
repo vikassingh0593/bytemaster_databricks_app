@@ -25,7 +25,7 @@ DATASET_CONFIG = {
 def load_data(master_name):
     try:
         table_name = DATASET_CONFIG[master_name]["table"]
-        data = getData(tb_nm=table_name, ActiveFlag = "Y")
+        data = getData(tb_nm=table_name, SqlStr='where ActiveFlag = "Y" ')
         
         # Ensure timestamp format
         ts_col = "UpdatedTimestamp"
