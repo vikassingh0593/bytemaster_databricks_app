@@ -102,11 +102,19 @@ st.markdown("""
         .stVerticalBlock { gap: 0.5rem !important; }
         .stElementContainer { margin-bottom: 0px !important; }
         
-        /* 5. BACK BUTTON & INPUT ALIGNMENT */
+        /* 5. BUTTON STYLING – grey for all (primary & secondary) */
         div.stButton > button {
             padding: 2px 5px !important;
             height: 2.2rem !important;
             min-height: 0px !important;
+            background-color: #6b7280 !important;
+            color: white !important;
+            border: 1px solid #4b5563 !important;
+        }
+        div.stButton > button:hover {
+            background-color: #4b5563 !important;
+            border-color: #374151 !important;
+            color: white !important;
         }
         div[data-baseweb="select"] > div {
             height: 2.2rem !important;
