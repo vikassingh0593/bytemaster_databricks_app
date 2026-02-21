@@ -143,7 +143,7 @@ def run_dashboard_ui():
             <style>
                 /* Target only the first column and force the vertical gap to zero */
                 div[data-testid="column"]:nth-of-type(1) div[data-testid="stVerticalBlock"] {
-                    gap: 0.5rem !important;
+                    gap: 0.1rem !important;
                 }
             </style>
         """, unsafe_allow_html=True)
