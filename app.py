@@ -149,15 +149,15 @@ if sub_label:
 
 st.markdown(
     f"""
-    <div style="text-align: center; margin-top: 4px; margin-bottom: 0px;">
-        <h1 style="margin-top: 4px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1.2;">
+    <div style="text-align: center; margin-top: 3px; margin-bottom: 0px;">
+        <h1 style="margin-top: 3px; margin-bottom: 0px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1.2;">
             NFG Wastage Reduction{breadcrumb}
         </h1>
     </div>
+    <hr style="margin: 0px 0 8px 0; border: none; border-top: 1px solid #ddd;">
     """,
     unsafe_allow_html=True
 )
-st.markdown("<hr style='margin: 0px 0px 10px 0px; border-top: 1px solid #ddd;'>", unsafe_allow_html=True)
 
 def render_card(page_data, is_wide=False):
     """
@@ -299,17 +299,6 @@ def settings_page():
         st.button("🏠", on_click=go, args=("home",))
         from pages.C_User_Settings import run_user_setting_ui
         run_user_setting_ui()
-
-
-# def dashboard_page():
-#     # General Access Check
-#     if not st.session_state.user_permissions:
-#         st.error("Access Denied")
-#         return
-
-#     with st.spinner(' '):
-#         st.button("🏠", on_click=go, args=("home",))
-#         st.write("Dashboard Placeholder")
 
 def dashboard_page():
     # General Access Check
