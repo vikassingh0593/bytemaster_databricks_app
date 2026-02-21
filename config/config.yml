@@ -1,0 +1,46 @@
+# -----------------------------
+# Database Configuration
+# -----------------------------
+database:
+  catalog: "bytemaster"
+  schema_name: "appdata"
+
+# -----------------------------
+# Dataset Configuration
+# -----------------------------
+datasets:
+  Substitution:
+    table: "{catalog}.{schema_name}.Substitution"
+    join_keys: ["ComponentId", "PlantId", "MaterialId"]
+    update_columns: ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"]
+    filter_columns: ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+
+  BatchReplacement:
+    table: "{catalog}.{schema_name}.BatchReplacement"
+    join_keys: ["ComponentId", "PlantId", "MaterialId"]
+    update_columns: ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"]
+    filter_columns: ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+
+  ProdIncrease:
+    table: "{catalog}.{schema_name}.ProdIncrease"
+    join_keys: ["ComponentId", "PlantId", "MaterialId"]
+    update_columns: ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"]
+    filter_columns: ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+
+  ComponentExclusion:
+    table: "{catalog}.{schema_name}.DimComponentExclusion"
+    join_keys: ["ComponentId", "PlantId"]
+    update_columns: ["ActiveFlag", "UpdatedTimestamp", "UserEmail"]
+    filter_columns: ["ComponentId", "PlantId", "UserEmail"]
+
+  DimSubstitution: 
+    table: "{catalog}.{schema_name}.DimSubstitution"
+    join_keys: ["ComponentId", "PlantId", "SubstituteOf"]
+    update_columns: ["ActiveFlag", "UpdatedTimestamp", "UserEmail"]
+    filter_columns: ["ComponentId", "PlantId", "UserEmail"]
+
+  UserSettings:
+    table: "{catalog}.{schema_name}.UserSettings"
+    join_keys: ["PlantId"]
+    update_columns: ["ApprovedMailID", "UserEmail", "UpdatedTimestamp"]
+    filter_columns: ["PlantId", "ApprovedMailID"]

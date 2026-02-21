@@ -1,3 +1,9 @@
+# COMMAND ----------
+import yaml
+
+with open("dataset_config.yml", "r") as file:
+    CONFIG = yaml.safe_load(file)
+
 # Databricks notebook source
 # DBTITLE 1,Cell 1
 # MAGIC %sql
