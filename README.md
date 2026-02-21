@@ -27,7 +27,7 @@ databricks sync --watch . /Workspace/Users/vikassingh0593@gmail.com/databricks_a
 ```bash
 export DATABRICKS_WAREHOUSE_ID=bd30e90188326d9e
 export STREAMLIT_THEME_BASE=light
-streamlit run app.py --theme.primaryColor=#6b7280
+streamlit run app.py --theme.primaryColor=#007bff
 ```
 
 ## Deploy

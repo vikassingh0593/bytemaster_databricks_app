@@ -29,14 +29,6 @@ DATASET_CONFIG = {
 # --- 2. DATA LOADER ---
 def load_data(model_name):
     try:
-        # user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com")
-        # table_name = DATASET_CONFIG[model_name]["table"]
-        # data = getData(tb_nm=table_name, ActiveFlag = None)
-
-        # us_df = getData("bytemaster.appdata.UserSettings")
-        # us_df['UserEmail'] = us_df['UserEmail'].astype(str).str.strip().str.lower()
-        # us_df = us_df[us_df['UserEmail'] == user_email.lower()]
-        # data = data.merge(us_df, on="PlantId", how="inner")
         
         # 1. Get User Email
         user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com").lower()
