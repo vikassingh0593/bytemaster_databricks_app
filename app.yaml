@@ -1,7 +1,8 @@
 command: [
   "streamlit", 
   "run",
-  "app.py"
+  "app.py",
+  "--theme.primaryColor=#6b7280"
 ]
 
 env:

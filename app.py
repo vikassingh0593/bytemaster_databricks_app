@@ -107,19 +107,59 @@ st.markdown("""
             padding: 2px 5px !important;
             height: 2.2rem !important;
             min-height: 0px !important;
-            background-color: #6b7280 !important;
-            color: white !important;
-            border: 1px solid #4b5563 !important;
+            # background-color: #6b7280 !important;
+            # color: white !important;
+            # border: 1px solid #4b5563 !important;
         }
-        div.stButton > button:hover {
-            background-color: #4b5563 !important;
-            border-color: #374151 !important;
-            color: white !important;
-        }
+        # div.stButton > button:hover {
+        #     background-color: #4b5563 !important;
+        #     border-color: #374151 !important;
+        #     color: white !important;
+        # }
         div[data-baseweb="select"] > div {
             height: 2.2rem !important;
             min-height: 0px !important;
         }
+        # /* 5. BUTTON STYLING - BASE */
+        # div.stButton > button {
+        #     padding: 2px 5px !important;
+        #     height: 2.2rem !important;
+        #     min-height: 0px !important;
+        #     transition: all 0.2s ease-in-out;
+        # }
+        
+        # /* HOVER STATE FOR SECONDARY BUTTONS */
+        # div.stButton > button:hover {
+        #     border-color: #6c757d !important;
+        #     color: #6c757d !important; 
+        # }
+
+        # /* OVERRIDE STREAMLIT'S DEFAULT PRIMARY RED BUTTON */
+        # div.stButton > button[kind="primary"] {
+        #     background-color: #6c757d !important;
+        #     border-color: #6c757d !important;
+        #     color: white !important;
+        # }
+
+        # /* HOVER FOR PRIMARY BUTTONS */
+        # div.stButton > button[kind="primary"]:hover {
+        #     background-color: #5a6268 !important; /* Slightly darker grey on hover */
+        #     border-color: #5a6268 !important;
+        # }
+
+        # /* CLICK / ACTIVE / FOCUS STATE FOR ALL BUTTONS */
+        # div.stButton > button:active, 
+        # div.stButton > button:focus {
+        #     background-color: #5a6268 !important; 
+        #     border-color: #5a6268 !important;     
+        #     color: white !important;              
+        #     box-shadow: none !important;          
+        # }
+
+        # div[data-baseweb="select"] > div {
+        #     height: 2.2rem !important;
+        #     min-height: 0px !important;
+        # }
     </style>
     """, unsafe_allow_html=True)
 

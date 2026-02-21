@@ -4,10 +4,11 @@
   "remote_path": "/Workspace/Users/vikassingh0593@gmail.com/databricks_apps/bytemaster_2026_01_30-16_47/streamlit-data-app",
   "last_modified_times": {
     ".gitignore": "2026-02-18T00:07:09.820708921+05:30",
-    "README.md": "2026-02-18T11:20:09.780138111+05:30",
+    ".streamlit/config.toml": "2026-02-21T12:39:31.317262232+05:30",
+    "README.md": "2026-02-21T12:36:37.53341367+05:30",
     "__init__.py": "2026-02-17T23:10:46.027715654+05:30",
-    "app.py": "2026-02-21T11:58:38.820138021+05:30",
-    "app.yaml": "2026-02-17T23:10:48.234299201+05:30",
+    "app.py": "2026-02-21T12:40:23.635691688+05:30",
+    "app.yaml": "2026-02-21T12:40:02.33280662+05:30",
     "app_old.py": "2026-02-18T22:52:37.329555399+05:30",
     "auth/__init__.py": "2026-02-17T23:10:49.24225774+05:30",
     "auth/auth.py": "2026-02-17T23:10:50.617568244+05:30",
@@ -26,6 +27,7 @@
   },
   "local_to_remote_names": {
     ".gitignore": ".gitignore",
+    ".streamlit/config.toml": ".streamlit/config.toml",
     "README.md": "README.md",
     "__init__.py": "__init__.py",
     "app.py": "app.py",
@@ -48,6 +50,7 @@
   },
   "remote_to_local_names": {
     ".gitignore": ".gitignore",
+    ".streamlit/config.toml": ".streamlit/config.toml",
     "README.md": "README.md",
     "__init__.py": "__init__.py",
     "app.py": "app.py",
