@@ -2,20 +2,11 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 import time
-import re # 🆕 Added for Regex validation
+import re # Added for Regex validation
 from database_query import getData, writeData, deleteData
+from config.configuration import DATASET_CONFIG # 🆕 Import global config
 
-# --- 1. CONFIGURATION ---
-DATASET_CONFIG = {
-    "UserSettings": {
-        "table": "bytemaster.appdata.UserSettings",
-        "join_keys": ["PlantId"], 
-        "update_columns": ["ApprovedMailID", "UserEmail", "UpdatedTimestamp"],
-        "filter_columns": ["PlantId", "ApprovedMailID"]
-    }
-}
-
-# --- 🆕 1.5 EMAIL VALIDATOR HELPER ---
+# --- 1. EMAIL VALIDATOR HELPER ---
 def validate_email_input(email_str):
     """
     Validates a comma-separated string of email addresses.
@@ -71,7 +62,17 @@ def run_user_setting_ui():
 
     current_cfg = DATASET_CONFIG["UserSettings"]
     
-    # --- 4. LAYOUT ---
+    # --- 4. LAYOUT: NAVIGATION ---
+    # We still want the Home button to align with the rest of your app's style!
+    nav_cols = st.columns([0.5, 9.5])
+    with nav_cols[0]:
+        if st.button("🏠", key="home_btn_settings", use_container_width=False):
+            st.session_state.page = "home"
+            st.rerun()
+            
+    st.markdown("<hr style='margin: 0px 0px 10px 0px; border-top: 1px solid #ddd;'>", unsafe_allow_html=True)
+
+    # --- 5. LAYOUT: FILTERS & ADD RECORD ---
     if st.session_state.user_df_to_edit is not None:
         df_display = st.session_state.user_df_to_edit.copy()
 
@@ -102,7 +103,8 @@ def run_user_setting_ui():
         with col_add:
             with st.popover("➕ Add", use_container_width=False):
                 st.write("**Add User Setting**")
-                with st.form("add_user_form", clear_on_submit=False): # Changed to False to keep input if error occurs
+                # clear_on_submit=False prevents wiping out user typing if they make a typo
+                with st.form("add_user_form", clear_on_submit=False): 
                     new_plant = st.text_input("PlantId", placeholder="e.g., P01")
                     new_email = st.text_input("ApprovedMailID", placeholder="e.g., user1@email.com, user2@email.com")
                     
@@ -110,7 +112,6 @@ def run_user_setting_ui():
                     
                     if submitted:
                         if new_plant and new_email:
-                            # 🆕 1. Validate the email input first
                             is_valid, err_msg = validate_email_input(new_email)
                             
                             if not is_valid:
@@ -147,7 +148,7 @@ def run_user_setting_ui():
                         else:
                             st.error("Both PlantId and Email are required.")
 
-        # --- 5. DATA EDITOR ---
+        # --- 6. DATA EDITOR ---
         column_configuration = {
             "PlantId": st.column_config.TextColumn("PlantId", width="medium", disabled=True), 
             "ApprovedMailID": st.column_config.TextColumn("ApprovedMailID", width="large", required=True),
@@ -171,7 +172,7 @@ def run_user_setting_ui():
             hide_index=True 
         )
 
-        # --- 6. PROCESS EDITS ---
+        # --- 7. PROCESS EDITS ---
         state = st.session_state.get(editor_key)
         
         if state and state.get("edited_rows"):
@@ -182,7 +183,7 @@ def run_user_setting_ui():
             for row_idx_in_filtered, changes in state["edited_rows"].items():
                 actual_index = df_display.index[row_idx_in_filtered]
                 
-                # 🆕 2. Validate edits made directly in the data editor
+                # Validation inside the data editor
                 if "ApprovedMailID" in changes:
                     is_valid, err_msg = validate_email_input(changes["ApprovedMailID"])
                     st.session_state.user_df_to_edit.at[actual_index, "UserEmail"] = st.context.headers.get("X-Forwarded-Email", "user@example.com")
@@ -194,7 +195,6 @@ def run_user_setting_ui():
                 # Apply changes if valid
                 for key, value in changes.items():
                     if key == "ApprovedMailID":
-                        # Clean it up before saving
                         value = ", ".join([e.strip() for e in value.split(',')])
                     st.session_state.user_df_to_edit.at[actual_index, key] = value
                 
@@ -206,7 +206,7 @@ def run_user_setting_ui():
             if has_changes and not has_error:
                 st.rerun()
 
-        # --- 7. SAVE ACTION ---
+        # --- 8. SAVE ACTION ---
         st.markdown("<hr style='margin: 0px 0px 10px 0px; border-top: 1px solid #ddd;'>", unsafe_allow_html=True)
         if st.button("Save Changes to Database", type="primary", use_container_width=False):
             

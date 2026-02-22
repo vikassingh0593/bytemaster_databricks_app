@@ -3,28 +3,17 @@ import pandas as pd
 from datetime import datetime
 import time
 from database_query import getData, writeData 
+from config.configuration import DATASET_CONFIG
 
-# --- 1. CONFIGURATION ---
-DATASET_CONFIG = {
-    "ComponentExclusion": {
-        "table": "bytemaster.appdata.DimComponentExclusion",
-        "join_keys": ["ComponentId", "PlantId"],
-        # Note: ActiveFlag defaults to 'Y' for new records usually
-        "update_columns": ["ActiveFlag", "UpdatedTimestamp", "UserEmail"],
-        "filter_columns": ["ComponentId", "PlantId", "UserEmail"]
-    },
-    "Substitution": {
-        "table": "bytemaster.appdata.DimSubstitution",
-        "join_keys": ["ComponentId", "PlantId", "SubstituteOf"],
-        "update_columns": ["ActiveFlag", "UpdatedTimestamp", "UserEmail"],
-        "filter_columns": ["ComponentId", "PlantId", "UserEmail"]
-    },
-}
+# --- 1. DYNAMIC CATEGORY ASSIGNMENT ---
+# Defines exactly what shows up on the screen for this Master Data page
+MASTER_TABLES = ["ComponentExclusion", "DimSubstitution"]
 
 # --- 2. DATA LOADER ---
 def load_data(master_name):
     try:
         table_name = DATASET_CONFIG[master_name]["table"]
+        # Assuming Master tables just need Active records, but adjust SqlStr if needed
         data = getData(tb_nm=table_name, SqlStr='where ActiveFlag = "Y" ')
         
         # Ensure timestamp format
@@ -45,9 +34,9 @@ def load_data(master_name):
 
 # --- 3. MAIN UI FUNCTION ---
 def run_master_ui():
-    # Initialize selection
-    if "master_selection" not in st.session_state:
-        st.session_state.master_selection = "ComponentExclusion"
+    # 🆕 SAFETY CHECK: Ensure selected master is one of the allowed tables
+    if "master_selection" not in st.session_state or st.session_state.master_selection not in MASTER_TABLES:
+        st.session_state.master_selection = MASTER_TABLES[0]
     
     # Initialize Editor Key for resetting the widget
     if "master_editor_key" not in st.session_state:
@@ -64,8 +53,11 @@ def run_master_ui():
     current_data = st.session_state.master_selection
     current_cfg = DATASET_CONFIG[current_data]
 
-    # --- UI NAVIGATION ---
-    nav_cols = st.columns([0.5, 0.5] + [1.5] * len(DATASET_CONFIG))
+    # ==========================================
+    # 🆕 UI NAVIGATION (Filtered to MASTER_TABLES)
+    # ==========================================
+    # Added a spacer [5.0] at the end so buttons don't stretch
+    nav_cols = st.columns([0.5, 0.5] + [1.5] * len(MASTER_TABLES) + [5.0])
 
     with nav_cols[0]:
         if st.button("🏠", use_container_width=False):
@@ -75,7 +67,8 @@ def run_master_ui():
             if "loaded_master_type" in st.session_state: del st.session_state.loaded_master_type
             st.rerun()
 
-    for i, model in enumerate(DATASET_CONFIG.keys()):
+    # Loop ONLY through the specific master tables
+    for i, model in enumerate(MASTER_TABLES):
         is_active = st.session_state.get("master_selection") == model
         if nav_cols[i+2].button(model, use_container_width=True, type="primary" if is_active else "secondary"):
             st.session_state.master_selection = model
@@ -87,18 +80,14 @@ def run_master_ui():
     if st.session_state.df_to_edit is not None:
         df_display = st.session_state.df_to_edit.copy()
 
-        # UPDATED COLUMNS CONFIGURATION
-        # [2.5] = Compact area for filters (approx 25% width)
-        # [6.5] = Wide empty space to push button to the right
-        # [1]   = Narrow area for the Add button (approx 10% width)
         col_filters, col_spacer, col_add = st.columns([4.5, 5.7, 0.8], gap="small")
         
         # --- LEFT: FILTERS ---
         with col_filters:
-            filter_cols = current_cfg.get("filter_columns", [])
+            # Safely exclude RunID just in case it ever appears in a master table
+            filter_cols = [col for col in current_cfg.get("filter_columns", []) if col != "RunID"]
+            
             if filter_cols:
-                # Check how many filters we have to avoid squeezing them too much
-                # If there are many filters, they will stack nicely in this narrower column
                 f_ui_cols = st.columns(len(filter_cols))
                 for idx, col_name in enumerate(filter_cols):
                     if col_name in df_display.columns:
@@ -119,7 +108,6 @@ def run_master_ui():
 
         # --- RIGHT: ADD RECORD POPUP ---
         with col_add:
-            # use_container_width=True ensures the button fills the narrow column width perfectly
             with st.popover("➕ Add", use_container_width=False):
                 st.write(f"**Add to {current_data}**")
                 with st.form("add_master_record", clear_on_submit=True):
@@ -128,7 +116,8 @@ def run_master_ui():
                     new_plant_id = st.text_input("PlantId", placeholder="Required")
                     
                     new_sub_of = None
-                    if current_data == "Substitution":
+                    # 🆕 Updated to check for DimSubstitution
+                    if current_data == "DimSubstitution":
                         new_sub_of = st.text_input("SubstituteOf", placeholder="Required")
                     
                     new_active = st.selectbox("ActiveFlag", options=["Y", "N"])
@@ -140,7 +129,7 @@ def run_master_ui():
                         valid = True
                         if not new_comp_id or not new_plant_id:
                             valid = False
-                        if current_data == "Substitution" and not new_sub_of:
+                        if current_data == "DimSubstitution" and not new_sub_of:
                             valid = False
                             
                         if valid:
@@ -155,7 +144,7 @@ def run_master_ui():
                                 ts_col: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             }
                             
-                            if current_data == "Substitution":
+                            if current_data == "DimSubstitution":
                                 new_row_data["SubstituteOf"] = new_sub_of
 
                             new_row_df = pd.DataFrame([new_row_data])
@@ -184,7 +173,6 @@ def run_master_ui():
             else:
                 column_configuration[col] = st.column_config.Column(disabled=True)
 
-        # Dynamic Key
         editor_key = f"editor_{current_data}_{st.session_state.master_editor_key}"
 
         st.data_editor(
@@ -221,7 +209,6 @@ def run_master_ui():
             df_curr = st.session_state.df_to_edit.reset_index(drop=True)
             df_orig = st.session_state.original_df.reset_index(drop=True)
             
-            # --- UPDATED SAVE LOGIC (Handles New + Modified Rows) ---
             rows_to_save = pd.DataFrame()
             
             # 1. Identify New Rows

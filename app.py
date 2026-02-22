@@ -5,6 +5,8 @@ from databricks import sql
 from databricks.sdk.core import Config
 import time
 from database_query import getData # Ensure this is imported correctly from your local file
+from config.configuration import DATASET_CONFIG # 🆕 Import global config
+
 
 # --- DATABRICKS CHECK ---
 assert os.getenv('DATABRICKS_WAREHOUSE_ID'), "DATABRICKS_WAREHOUSE_ID must be set in app.yaml."
@@ -31,7 +33,8 @@ def load_user_permissions():
         # 1. Fetch the permissions table
         # We fetch the whole table to check permissions. 
         # In a very large system, you might query specific user rows, but for settings tables this is fine.
-        df_perms = getData("bytemaster.appdata.UserSettings")
+        table_name = DATASET_CONFIG["UserSettings"]["table"]
+        df_perms = getData(tb_nm=table_name, SqlStr = None)
         
         if df_perms.empty:
             return []
@@ -339,7 +342,6 @@ def settings_page():
         return
 
     with st.spinner(' '):
-        st.button("🏠", on_click=go, args=("home",))
         from pages.C_User_Settings import run_user_setting_ui
         run_user_setting_ui()
 
@@ -349,9 +351,7 @@ def dashboard_page():
         st.error("Access Denied")
         return
 
-    with st.spinner('Loading Dashboard...'):
-        # st.button("🏠 Home", on_click=go, args=("home",))
-        
+    with st.spinner(' '):        
         # Import and run the dashboard UI
         from pages.D_Dashboard import run_dashboard_ui
         run_dashboard_ui()

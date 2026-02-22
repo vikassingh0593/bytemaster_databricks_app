@@ -11,21 +11,21 @@ database:
 datasets:
   Substitution:
     table: "{catalog}.{schema_name}.Substitution"
-    join_keys: ["ComponentId", "PlantId", "MaterialId"]
+    join_keys: ["RunID", "ComponentId", "PlantId", "MaterialId"]
     update_columns: ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"]
-    filter_columns: ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+    filter_columns: ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
 
   BatchReplacement:
     table: "{catalog}.{schema_name}.BatchReplacement"
-    join_keys: ["ComponentId", "PlantId", "MaterialId"]
+    join_keys: ["RunID", "ComponentId", "PlantId", "MaterialId"]
     update_columns: ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"]
-    filter_columns: ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+    filter_columns: ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
 
   ProdIncrease:
     table: "{catalog}.{schema_name}.ProdIncrease"
-    join_keys: ["ComponentId", "PlantId", "MaterialId"]
+    join_keys: ["RunID", "ComponentId", "PlantId", "MaterialId"]
     update_columns: ["QtyAtRisk", "PotentialSaving", "ActualSaving", "Feedback", "CreatedTimestamp", "UserEmail"]
-    filter_columns: ["ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
+    filter_columns: ["RunID", "ComponentId", "PlantId", "MaterialId", "UserEmail", "Feedback"]
 
   ComponentExclusion:
     table: "{catalog}.{schema_name}.DimComponentExclusion"

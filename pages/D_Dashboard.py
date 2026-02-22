@@ -11,7 +11,7 @@ MODEL_TABLES = ["Substitution", "BatchReplacement", "ProdIncrease"]
 MASTER_TABLES = ["ComponentExclusion", "DimSubstitution"] 
 
 # --- 2. DATA LOADER & HELPERS ---
-# @st.cache_data(ttl=300) 
+@st.cache_data(ttl=300) 
 def load_dashboard_data(table_path, is_model=False):
     """Loads data and applies basic pre-processing."""
     try:
@@ -88,9 +88,20 @@ def render_data(tables_list, nav_key, is_model=True):
     for idx, col_name in enumerate(valid_filters):
         with layout_columns[idx]: 
             unique_vals = sorted(df[col_name].dropna().unique().tolist())
+
+            # ---------------------------------------------------------
+            # 🆕 DEFAULT LOGIC: Pre-select the latest RunID
+            # ---------------------------------------------------------
+            default_selection = None
+            if col_name == "RunID" and unique_vals:
+                # Get the absolute maximum value for RunID to use as default
+                latest_run = df[col_name].dropna().max()
+                default_selection = [latest_run]
+
             selected = st.multiselect(
                 f"{col_name}",
                 options=unique_vals,
+                default=default_selection,
                 key=f"f_{nav_key}_{selected_table}_{col_name}",
                 label_visibility="collapsed",
                 placeholder=f"{col_name}"
