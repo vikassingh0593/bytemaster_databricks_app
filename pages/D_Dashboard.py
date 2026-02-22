@@ -577,6 +577,7 @@ def run_dashboard_ui():
             selected_table, filtered_df = render_data(MASTER_TABLES, "sub_nav_master", is_model=False)
             
             if not filtered_df.empty:
+                st.markdown("<hr style='margin: 0px 0px 0px 0px;'>", unsafe_allow_html=True)
                 st.dataframe(filtered_df, use_container_width=True, hide_index=True, height=493)
             else:
                 st.warning("No data found.")
