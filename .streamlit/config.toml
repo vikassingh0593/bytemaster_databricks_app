@@ -1,5 +1,7 @@
-# Theme: run "streamlit run app.py" from the project root so this file is found.
-# Project config path is: <current working directory>/.streamlit/config.toml
+[client]
+# Disables the default multipage sidebar navigation
+showSidebarNavigation = false 
+
 [theme]
-base = "light"
-primaryColor = "#007bff"
+# (Optional) You can also define your grey buttons here instead of CSS
+primaryColor = "#6c757d"

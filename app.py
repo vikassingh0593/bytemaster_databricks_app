@@ -12,73 +12,11 @@ from config.configuration import DATASET_CONFIG # 🆕 Import global config
 assert os.getenv('DATABRICKS_WAREHOUSE_ID'), "DATABRICKS_WAREHOUSE_ID must be set in app.yaml."
 
 # --- PAGE CONFIG ---
-st.set_page_config(page_title="NFG Wastage Reduction", layout="wide")
-
-# ==========================================
-# 🔐 AUTHENTICATION & ACCESS CONTROL LOGIC
-# ==========================================
-def get_current_user_email():
-    # In Databricks apps, the email is passed in headers
-    # Default to a test user for local development
-    return st.context.headers.get("X-Forwarded-Email", "user@example.com")
-
-def load_user_permissions():
-    """
-    Fetches UserSettings and determines what the current user can see.
-    Returns a list of allowed PlantIds (e.g., ['P01', 'P02'] or ['ALL']).
-    """
-    try:
-        user_email = get_current_user_email()
-        
-        # 1. Fetch the permissions table
-        # We fetch the whole table to check permissions. 
-        # In a very large system, you might query specific user rows, but for settings tables this is fine.
-        table_name = DATASET_CONFIG["UserSettings"]["table"]
-        df_perms = getData(tb_nm=table_name, SqlStr = None)
-        
-        if df_perms.empty:
-            return []
-        user_email_lower = str(user_email).strip().lower()
-
-        # 2. Filter df_perms for rows where user_email is in the comma-separated ApprovedMailID
-        # We split by comma, strip whitespace from each email, and check for a match
-        my_perms = df_perms[
-            df_perms['ApprovedMailID'].astype(str).str.lower().apply(
-                lambda x: user_email_lower in [email.strip() for email in x.split(',')]
-            )
-        ]
-
-        # 3. Check if any permissions were found
-        if my_perms.empty:
-            return [] # No access
-
-        # 4. Get unique list of plants and normalize to uppercase
-        allowed_plants = my_perms['PlantId'].unique().tolist()
-        allowed_plants = [str(p).strip().upper() for p in allowed_plants]
-
-        # 5. Result
-        return allowed_plants
-
-    except Exception as e:
-        st.error(f"Auth Error: {e}")
-        return []
-
-# --- INITIALIZE AUTH STATE ---
-# We load permissions once per session start to avoid hitting DB on every rerun
-if "user_permissions" not in st.session_state:
-    st.session_state.user_permissions = load_user_permissions()
-    st.session_state.user_email = get_current_user_email()
-
-# ==========================================
-# 🎨 UI STYLING & COMPONENTS
-# ==========================================
-
-import base64
-
-def get_base64_of_bin_file(bin_file):
-    with open(bin_file, 'rb') as f:
-        data = f.read()
-    return base64.b64encode(data).decode()
+st.set_page_config(
+    page_title="NFG Wastage Reduction",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+    )
 
 st.markdown("""
     <style>
@@ -162,6 +100,73 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# ==========================================
+# 🔐 AUTHENTICATION & ACCESS CONTROL LOGIC
+# ==========================================
+def get_current_user_email():
+    # In Databricks apps, the email is passed in headers
+    # Default to a test user for local development
+    return st.context.headers.get("X-Forwarded-Email", "user@example.com")
+
+def load_user_permissions():
+    """
+    Fetches UserSettings and determines what the current user can see.
+    Returns a list of allowed PlantIds (e.g., ['P01', 'P02'] or ['ALL']).
+    """
+    try:
+        user_email = get_current_user_email()
+        
+        # 1. Fetch the permissions table
+        # We fetch the whole table to check permissions. 
+        # In a very large system, you might query specific user rows, but for settings tables this is fine.
+        table_name = DATASET_CONFIG["UserSettings"]["table"]
+        df_perms = getData(tb_nm=table_name, SqlStr = None)
+        
+        if df_perms.empty:
+            return []
+        user_email_lower = str(user_email).strip().lower()
+
+        # 2. Filter df_perms for rows where user_email is in the comma-separated ApprovedMailID
+        # We split by comma, strip whitespace from each email, and check for a match
+        my_perms = df_perms[
+            df_perms['ApprovedMailID'].astype(str).str.lower().apply(
+                lambda x: user_email_lower in [email.strip() for email in x.split(',')]
+            )
+        ]
+
+        # 3. Check if any permissions were found
+        if my_perms.empty:
+            return [] # No access
+
+        # 4. Get unique list of plants and normalize to uppercase
+        allowed_plants = my_perms['PlantId'].unique().tolist()
+        allowed_plants = [str(p).strip().upper() for p in allowed_plants]
+
+        # 5. Result
+        return allowed_plants
+
+    except Exception as e:
+        st.error(f"Auth Error: {e}")
+        return []
+
+# --- INITIALIZE AUTH STATE ---
+# We load permissions once per session start to avoid hitting DB on every rerun
+if "user_permissions" not in st.session_state:
+    with st.spinner("Setting up application and verifying permissions..."):
+        st.session_state.user_permissions = load_user_permissions()
+        st.session_state.user_email = get_current_user_email()
+
+# ==========================================
+# 🎨 UI STYLING & COMPONENTS
+# ==========================================
+
+import base64
+
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
 # --- ROUTER STATE ---
 if "page" not in st.session_state:
     st.session_state.page = "home"
@@ -189,18 +194,29 @@ elif st.session_state.page == "master":
 elif st.session_state.page == "Settings":
     sub_label = ""
 elif st.session_state.page == "dashboard":
-    sub_label = st.session_state.get("nav_main", "Model Output")
+    sub_label = st.session_state.get("nav_main", "Current Waste Risk Summary")
 if sub_label:
     breadcrumb += f" <span style='color: #666; font-size: 2rem;vertical-align: middle;'>➔</span> {sub_label}"
 
+# st.markdown(
+#     f"""
+#     <div style="text-align: center; margin-top: 3px; margin-bottom: 0px;">
+#         <h1 style="margin-top: 3px; margin-bottom: 0px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1.2;">
+#             NFG Wastage Reduction{breadcrumb}
+#         </h1>
+#     </div>
+#     <hr style="margin: 0px 0 8px 0; border: none; border-top: 1px solid #ddd;">
+#     """,
+#     unsafe_allow_html=True
+# )
 st.markdown(
     f"""
-    <div style="text-align: center; margin-top: 3px; margin-bottom: 0px;">
-        <h1 style="margin-top: 3px; margin-bottom: 0px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1.2;">
+    <div style="text-align: center; margin-top: 6px; margin-bottom: 4px; padding-bottom: 0px;">
+        <h1 style="margin-top: 0px; margin-bottom: 0px; padding-bottom: 0px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1;">
             NFG Wastage Reduction{breadcrumb}
         </h1>
     </div>
-    <hr style="margin: 0px 0 8px 0; border: none; border-top: 1px solid #ddd;">
+    <hr style="margin-top: 7px; margin-bottom: 8px; border: none; border-top: 1px solid #ddd;">
     """,
     unsafe_allow_html=True
 )
