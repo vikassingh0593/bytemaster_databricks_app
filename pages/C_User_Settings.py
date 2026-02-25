@@ -173,6 +173,8 @@ def run_user_setting_ui():
         )
 
         # --- 7. PROCESS EDITS ---
+        # state = st.session_state.get(editor_key)
+        # --- 7. PROCESS EDITS ---
         state = st.session_state.get(editor_key)
         
         if state and state.get("edited_rows"):
@@ -182,7 +184,30 @@ def run_user_setting_ui():
             
             for row_idx_in_filtered, changes in state["edited_rows"].items():
                 actual_index = df_display.index[row_idx_in_filtered]
+                actual_plant_id = st.session_state.user_df_to_edit.at[actual_index, "PlantId"]
+                current_emails = st.session_state.user_df_to_edit.at[actual_index, "ApprovedMailID"]
                 
+                # ==========================================
+                # 🛡️ SUPER ADMIN PROTECTION 
+                # ==========================================
+                # 1. Prevent removing the email via text edit
+                if actual_plant_id == "All" and "ApprovedMailID" in changes:
+                    new_emails = [e.strip() for e in changes["ApprovedMailID"].split(',')]
+                    if "vikassingh0593@gmail.com" not in new_emails:
+                        st.error("⚠️ Action Blocked: You cannot remove 'vikassingh0593@gmail.com' from the 'All' PlantID.")
+                        has_error = True
+                        st.session_state.user_editor_key += 1 # Force UI reset
+                        continue 
+                        
+                # 2. Prevent deleting the entire All row
+                if actual_plant_id == "All" and changes.get("Delete") is True:
+                    if "vikassingh0593@gmail.com" in current_emails:
+                        st.error("⚠️ Action Blocked: You cannot delete the 'All' PlantID row.")
+                        has_error = True
+                        st.session_state.user_editor_key += 1 # Force UI reset
+                        continue
+                # ==========================================
+
                 # Validation inside the data editor
                 if "ApprovedMailID" in changes:
                     is_valid, err_msg = validate_email_input(changes["ApprovedMailID"])
@@ -190,6 +215,7 @@ def run_user_setting_ui():
                     if not is_valid:
                         st.error(f"Row edit failed: {err_msg}")
                         has_error = True
+                        st.session_state.user_editor_key += 1
                         continue # Skip applying this change
                 
                 # Apply changes if valid
@@ -205,6 +231,41 @@ def run_user_setting_ui():
             
             if has_changes and not has_error:
                 st.rerun()
+            elif has_error:
+                time.sleep(1.5) # Give the user time to read the error before resetting
+                st.rerun()
+        
+        # if state and state.get("edited_rows"):
+        #     ts_col = "UpdatedTimestamp"
+        #     has_changes = False
+        #     has_error = False
+        #     PROTECTED_EMAIL = "vikassingh0593@gmail.com"
+            
+        #     for row_idx_in_filtered, changes in state["edited_rows"].items():
+        #         actual_index = df_display.index[row_idx_in_filtered]
+                
+        #         # Validation inside the data editor
+        #         if "ApprovedMailID" in changes:
+        #             is_valid, err_msg = validate_email_input(changes["ApprovedMailID"])
+        #             st.session_state.user_df_to_edit.at[actual_index, "UserEmail"] = st.context.headers.get("X-Forwarded-Email", "user@example.com")
+        #             if not is_valid:
+        #                 st.error(f"Row edit failed: {err_msg}")
+        #                 has_error = True
+        #                 continue # Skip applying this change
+                
+        #         # Apply changes if valid
+        #         for key, value in changes.items():
+        #             if key == "ApprovedMailID":
+        #                 value = ", ".join([e.strip() for e in value.split(',')])
+        #             st.session_state.user_df_to_edit.at[actual_index, key] = value
+                
+        #         if "Delete" not in changes or len(changes) > 1:
+        #             st.session_state.user_df_to_edit.at[actual_index, ts_col] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+        #         has_changes = True
+            
+        #     if has_changes and not has_error:
+        #         st.rerun()
 
         # --- 8. SAVE ACTION ---
         st.markdown("<hr style='margin: 0px 0px 10px 0px; border-top: 1px solid #ddd;'>", unsafe_allow_html=True)
