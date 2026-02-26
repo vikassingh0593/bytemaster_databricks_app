@@ -47,5 +47,5 @@ def load_dataset_config(file_path: str = "config/config.yml") -> dict:
 DATASET_CONFIG = load_dataset_config()
 
 # If you print this, it will output exactly what you want: 
-# "bytemaster.appdata.Substitution"
-# print(DATASET_CONFIG["Substitution"]["table"])
+# "bytemaster.appdata.AlternativeSourcing"
+# print(DATASET_CONFIG["AlternativeSourcing"]["table"])

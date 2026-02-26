@@ -4,14 +4,15 @@ import yaml
 with open("dataset_config.yml", "r") as file:
     CONFIG = yaml.safe_load(file)
 
-# Databricks notebook source
-# DBTITLE 1,Cell 1
-# MAGIC %sql
-# MAGIC CREATE CATALOG IF NOT EXISTS bytemaster;
-# MAGIC USE CATALOG bytemaster;
-# MAGIC DROP SCHEMA IF EXISTS appdata CASCADE;
-# MAGIC CREATE SCHEMA appdata;
-# MAGIC USE SCHEMA appdata;
+catalog_name = CONFIG['database']['catalog']
+schema_name = CONFIG['database']['schema_name']
+
+spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog_name}")
+spark.sql(f"USE CATALOG {catalog_name}")
+
+spark.sql(f"DROP SCHEMA IF EXISTS {schema_name} CASCADE")
+spark.sql(f"CREATE SCHEMA  {schema_name}")
+spark.sql(f"USE SCHEMA {schema_name}")
 
 # COMMAND ----------
 
@@ -39,11 +40,11 @@ RunIdList = [(datetime.today() - timedelta(days=i)).strftime("%Y%m%d") for i in 
 
 # COMMAND ----------
 
-# DBTITLE 1,Substitution
+# DBTITLE 1,AlternativeSourcing
 
 # 2. SQL Table Definition
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS Substitution (
+CREATE TABLE IF NOT EXISTS AlternativeSourcing (
     RunID STRING,
     ComponentId STRING,
     PlantId STRING,
@@ -115,17 +116,17 @@ def create_model_Data():
 substitution_df = create_model_Data()
 
 # Overwrite the table
-substitution_df.write.format("delta").mode("overwrite").saveAsTable("Substitution")
+substitution_df.write.format("delta").mode("overwrite").saveAsTable("AlternativeSourcing")
 # substitution_df.display()
 
 # COMMAND ----------
 
-# DBTITLE 1,BatchReplacement
+# DBTITLE 1,BatchOptimization
 # -----------------------------
-# BatchReplacement & ProdIncrease
+# BatchOptimization & ProductionScaling
 # -----------------------------
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS BatchReplacement (
+CREATE TABLE IF NOT EXISTS BatchOptimization (
     RunID STRING,
     ComponentId STRING,
     PlantId STRING,
@@ -141,14 +142,14 @@ USING DELTA""")
 
 batchReplacement_df= create_model_Data()
 
-batchReplacement_df.write.format("delta").mode("overwrite").saveAsTable("BatchReplacement")
+batchReplacement_df.write.format("delta").mode("overwrite").saveAsTable("BatchOptimization")
 # batchReplacement_df.display()
 
 # COMMAND ----------
 
-# DBTITLE 1,ProdIncrease
+# DBTITLE 1,ProductionScaling
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS ProdIncrease (
+CREATE TABLE IF NOT EXISTS ProductionScaling (
     RunID STRING,
     ComponentId STRING,
     PlantId STRING,
@@ -163,7 +164,7 @@ CREATE TABLE IF NOT EXISTS ProdIncrease (
 USING DELTA""")
 
 prodInc_df= create_model_Data()
-prodInc_df.write.format("delta").mode("overwrite").saveAsTable("ProdIncrease")
+prodInc_df.write.format("delta").mode("overwrite").saveAsTable("ProductionScaling")
 # prodInc_df.display()
 
 # COMMAND ----------

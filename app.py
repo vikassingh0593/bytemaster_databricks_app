@@ -188,7 +188,7 @@ breadcrumb = page_labels.get(st.session_state.page, "")
 sub_label = ""
 
 if st.session_state.page == "model":
-    sub_label = st.session_state.get("selected_model", "Substitution")
+    sub_label = st.session_state.get("selected_model", "AlternativeSourcing")
 elif st.session_state.page == "master":
     sub_label = st.session_state.get("selected_master", "ComponentExclusion")
 elif st.session_state.page == "Settings":
@@ -321,10 +321,10 @@ def home():
         """, unsafe_allow_html=True)
         
         # Ensure the image exists, or handle gracefully
-        if os.path.exists("images/logo.png"):
-            st.image("images/logo.png", use_column_width=True)
+        if os.path.exists("images/image.png"):
+            st.image("images/image.png", use_column_width=True)
         else:
-            st.warning("Logo image not found at images/logo.png")
+            st.warning("Logo image not found at images/image.png")
 
 # --- PAGES ---
 
