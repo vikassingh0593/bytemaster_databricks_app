@@ -13,7 +13,7 @@ assert os.getenv('DATABRICKS_WAREHOUSE_ID'), "DATABRICKS_WAREHOUSE_ID must be se
 
 # --- PAGE CONFIG ---
 st.set_page_config(
-    page_title="Zero Waste Initiative",
+    page_title="NFG Wastage Reduction",
     layout="wide",
     initial_sidebar_state="collapsed"
     )
@@ -202,7 +202,7 @@ if sub_label:
 #     f"""
 #     <div style="text-align: center; margin-top: 3px; margin-bottom: 0px;">
 #         <h1 style="margin-top: 3px; margin-bottom: 0px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1.2;">
-#             Zero Waste Initiative{breadcrumb}
+#             NFG Wastage Reduction{breadcrumb}
 #         </h1>
 #     </div>
 #     <hr style="margin: 0px 0 8px 0; border: none; border-top: 1px solid #ddd;">
@@ -213,7 +213,7 @@ st.markdown(
     f"""
     <div style="text-align: center; margin-top: 6px; margin-bottom: 4px; padding-bottom: 0px;">
         <h1 style="margin-top: 0px; margin-bottom: 0px; padding-bottom: 0px; color: #31333F; font-size: 2.2rem; font-weight: 800; line-height: 1;">
-            Zero Waste Initiative{breadcrumb}
+            NFG Wastage Reduction{breadcrumb}
         </h1>
     </div>
     <hr style="margin-top: 7px; margin-bottom: 8px; border: none; border-top: 1px solid #ddd;">
