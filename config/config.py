@@ -268,7 +268,7 @@ USING DELTA""")
 
 # 1. Initialize mapping with your "All" access requirement
 # We use a dictionary to group emails by PlantId: {PlantId: [email1, email2]}
-plant_user_map = {"All": ["vikassingh0593@gmail.com"]}
+plant_user_map = {"All": ["vikassingh0593@gmail.com", "user@example.com"]}
 
 # 2. Distribute other users across specific plants
 for email in UserEmailList:
