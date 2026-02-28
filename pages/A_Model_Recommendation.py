@@ -7,7 +7,7 @@ from config.configuration import DATASET_CONFIG
 
 # --- 1. CONFIGURATION IS IMPORTED ---
 # MODEL_TABLES defines exactly what shows up on the screen for this page
-MODEL_TABLES = ["AlternativeSourcing", "BatchOptimization", "ProductionScaling"]
+MODEL_TABLES = ["SourcingIntelligence", "BatchConsolidation", "VolumeExpansion"]
 
 
 # --- 2. DATA LOADER ---
@@ -16,7 +16,7 @@ def load_data(model_name):
         user_email = st.context.headers.get("X-Forwarded-Email", "user@example.com").lower()
 
         table_name = DATASET_CONFIG[model_name]["table"]
-        data = getData(tb_nm=table_name, SqlStr=' where RunID = (select max(RunID) from bytemaster.appdata.AlternativeSourcing)')
+        data = getData(tb_nm=table_name, SqlStr=' where RunID = (select max(RunID) from bytemaster.appdata.SourcingIntelligence)')
 
         us_df = getData(DATASET_CONFIG['UserSettings']["table"])
         user_email_lower = str(user_email).strip().lower()

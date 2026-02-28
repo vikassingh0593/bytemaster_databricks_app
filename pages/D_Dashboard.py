@@ -5,8 +5,8 @@ from database_query import getData
 from config.configuration import DATASET_CONFIG
 
 # --- 1. DYNAMIC CATEGORY ASSIGNMENT ---
-MODEL_TABLES = ["AlternativeSourcing", "BatchOptimization", "ProductionScaling"]
-MASTER_TABLES = ["ComponentExclusion", "DimSubstitution"] 
+MODEL_TABLES = ["SourcingIntelligence", "BatchConsolidation", "VolumeExpansion"]
+MASTER_TABLES = ["EligibilityBlacklist", "AlternateMapping"] 
 
 # --- 2. DATA LOADER & HELPERS ---
 @st.cache_data(ttl=300) 

@@ -7,7 +7,7 @@ from config.configuration import DATASET_CONFIG
 
 # --- 1. DYNAMIC CATEGORY ASSIGNMENT ---
 # Defines exactly what shows up on the screen for this Master Data page
-MASTER_TABLES = ["ComponentExclusion", "DimSubstitution"]
+MASTER_TABLES = ["EligibilityBlacklist", "AlternateMapping"]
 
 # --- 2. DATA LOADER ---
 def load_data(master_name):
@@ -116,8 +116,8 @@ def run_master_ui():
                     new_plant_id = st.text_input("PlantId", placeholder="Required")
                     
                     new_sub_of = None
-                    # 🆕 Updated to check for DimSubstitution
-                    if current_data == "DimSubstitution":
+                    # 🆕 Updated to check for AlternateMapping
+                    if current_data == "AlternateMapping":
                         new_sub_of = st.text_input("SubstituteOf", placeholder="Required")
                     
                     new_active = st.selectbox("ActiveFlag", options=["Y", "N"])
@@ -129,7 +129,7 @@ def run_master_ui():
                         valid = True
                         if not new_comp_id or not new_plant_id:
                             valid = False
-                        if current_data == "DimSubstitution" and not new_sub_of:
+                        if current_data == "AlternateMapping" and not new_sub_of:
                             valid = False
                             
                         if valid:
@@ -144,7 +144,7 @@ def run_master_ui():
                                 ts_col: datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             }
                             
-                            if current_data == "DimSubstitution":
+                            if current_data == "AlternateMapping":
                                 new_row_data["SubstituteOf"] = new_sub_of
 
                             new_row_df = pd.DataFrame([new_row_data])

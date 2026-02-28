@@ -188,9 +188,9 @@ breadcrumb = page_labels.get(st.session_state.page, "")
 sub_label = ""
 
 if st.session_state.page == "model":
-    sub_label = st.session_state.get("selected_model", "AlternativeSourcing")
+    sub_label = st.session_state.get("selected_model", "SourcingIntelligence")
 elif st.session_state.page == "master":
-    sub_label = st.session_state.get("selected_master", "ComponentExclusion")
+    sub_label = st.session_state.get("selected_master", "EligibilityBlacklist")
 elif st.session_state.page == "Settings":
     sub_label = ""
 elif st.session_state.page == "dashboard":

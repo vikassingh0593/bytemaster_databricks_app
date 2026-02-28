@@ -1,7 +1,7 @@
 # COMMAND ----------
 import yaml
 
-with open("dataset_config.yml", "r") as file:
+with open("config.yml", "r") as file:
     CONFIG = yaml.safe_load(file)
 
 catalog_name = CONFIG['database']['catalog']
@@ -33,18 +33,18 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType, T
 PlantIdList = [f"P{str(i).zfill(2)}" for i in range(1, 11)]
 MatIdList = [f"M{str(i).zfill(2)}" for i in range(1, 101)]
 CompIdList = [f"C{str(i).zfill(2)}" for i in range(1, 101)]
-FeedbackList = ["Unactioned", "Accepted", "Rejected", "Under Review"]
+FeedbackList = ["Unactioned", "Accept", "Reject", "Under Review"]
 UserEmailList = ["vikassingh0593@gmail.com", "vikassingh0597@gmail.com",
                  "user@example.com", "ankitsingh7010@gmail.com"]
 RunIdList = [(datetime.today() - timedelta(days=i)).strftime("%Y%m%d") for i in range(0, 30)]
 
 # COMMAND ----------
 
-# DBTITLE 1,AlternativeSourcing
+# DBTITLE 1,SourcingIntelligence
 
 # 2. SQL Table Definition
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS AlternativeSourcing (
+CREATE TABLE IF NOT EXISTS SourcingIntelligence (
     RunID STRING,
     ComponentId STRING,
     PlantId STRING,
@@ -71,13 +71,20 @@ def create_model_Data():
         
         # Logic: Current RunID vs Historical RunIDs
         if run_id == current_run_id:
-            feedback = "Unactioned"
-            actual_saving = None
-            user_email = None
+            # 80% chance it's still Unactioned, 20% chance user already acted on it
+            if random.random() > 0.2:
+                feedback = "Unactioned"
+                actual_saving = None
+                user_email = None
+            else:
+                # Mocking a user who is currently working on today's data
+                feedback = random.choice(FeedbackList)
+                actual_saving = round(random.uniform(0, potential_saving), 2) if feedback == "Accept" else 0.0
+                user_email = random.choice(UserEmailList)
         else:
             # For past runs, randomize the feedback and savings
             feedback = random.choice(FeedbackList)
-            actual_saving = round(random.uniform(0, potential_saving), 2) if feedback == "Accepted" else 0.0
+            actual_saving = round(random.uniform(0, potential_saving), 2) if feedback == "Accept" else 0.0
             user_email = random.choice(UserEmailList)
 
         Substitution_raw_data.append((
@@ -116,17 +123,17 @@ def create_model_Data():
 substitution_df = create_model_Data()
 
 # Overwrite the table
-substitution_df.write.format("delta").mode("overwrite").saveAsTable("AlternativeSourcing")
+substitution_df.write.format("delta").mode("overwrite").saveAsTable("SourcingIntelligence")
 # substitution_df.display()
 
 # COMMAND ----------
 
-# DBTITLE 1,BatchOptimization
+# DBTITLE 1,BatchConsolidation
 # -----------------------------
-# BatchOptimization & ProductionScaling
+# BatchConsolidation & VolumeExpansion
 # -----------------------------
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS BatchOptimization (
+CREATE TABLE IF NOT EXISTS BatchConsolidation (
     RunID STRING,
     ComponentId STRING,
     PlantId STRING,
@@ -142,14 +149,14 @@ USING DELTA""")
 
 batchReplacement_df= create_model_Data()
 
-batchReplacement_df.write.format("delta").mode("overwrite").saveAsTable("BatchOptimization")
+batchReplacement_df.write.format("delta").mode("overwrite").saveAsTable("BatchConsolidation")
 # batchReplacement_df.display()
 
 # COMMAND ----------
 
-# DBTITLE 1,ProductionScaling
+# DBTITLE 1,VolumeExpansion
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS ProductionScaling (
+CREATE TABLE IF NOT EXISTS VolumeExpansion (
     RunID STRING,
     ComponentId STRING,
     PlantId STRING,
@@ -164,7 +171,7 @@ CREATE TABLE IF NOT EXISTS ProductionScaling (
 USING DELTA""")
 
 prodInc_df= create_model_Data()
-prodInc_df.write.format("delta").mode("overwrite").saveAsTable("ProductionScaling")
+prodInc_df.write.format("delta").mode("overwrite").saveAsTable("VolumeExpansion")
 # prodInc_df.display()
 
 # COMMAND ----------
@@ -174,10 +181,10 @@ from pyspark.sql.functions import lit, current_timestamp, col
 import random
 
 # -----------------------------
-# DimComponentExclusion Data
+# EligibilityBlacklist Data
 # -----------------------------
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS DimComponentExclusion (
+CREATE TABLE IF NOT EXISTS EligibilityBlacklist (
     ComponentId STRING,
     PlantId STRING,
     ActiveFlag STRING,
@@ -205,14 +212,14 @@ exclusion_df = (
     .withColumn("UpdatedTimestamp", current_timestamp())
 )
 
-exclusion_df.write.format("delta").mode("overwrite").saveAsTable("DimComponentExclusion")
+exclusion_df.write.format("delta").mode("overwrite").saveAsTable("EligibilityBlacklist")
 # exclusion_df.display()
 
 # -----------------------------
-# DimSubstitution Data
+# AlternateMapping Data
 # -----------------------------
 spark.sql(f"""
-CREATE TABLE IF NOT EXISTS DimSubstitution (
+CREATE TABLE IF NOT EXISTS AlternateMapping (
     ComponentId STRING,
     SubstituteOf STRING,
     PlantId STRING,
@@ -245,7 +252,7 @@ substitution_df = (
 # Optional: filter to ensure a component isn't a substitute of itself
 substitution_df = substitution_df.filter(col("ComponentId") != col("SubstituteOf"))
 
-substitution_df.write.format("delta").mode("overwrite").saveAsTable("DimSubstitution")
+substitution_df.write.format("delta").mode("overwrite").saveAsTable("AlternateMapping")
 # substitution_df.display()
 
 # COMMAND ----------
